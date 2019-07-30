@@ -40,7 +40,8 @@ class GraphMap extends Component {
             },
             examined: {},
             id: uuid,
-            coordinates: []
+            coordinates: [],
+            neighbors: []
         }
     }
 
@@ -53,13 +54,16 @@ class GraphMap extends Component {
 
     getCoords = data => {
         let coordinates = []
+        let neighbors = []
         for (let key in data){
             coordinates.push({x: data[key][0]['x'], y: data[key][0]['y']})
-            console.log(data[key[0]])
+            neighbors.push(data[key][1])
         }
         console.log('COORDINATES', coordinates)
+        console.log('neighbors', neighbors)
         this.setState({
-            coordinates
+            coordinates,
+            neighbors
         })
     }
 
@@ -340,7 +344,10 @@ class GraphMap extends Component {
                         </p>
                         ))}
                 </div>
-                <Graph coordinates={this.state.coordinates}/>
+                <Graph 
+                    coordinates={this.state.coordinates}
+                    neighbors={this.state.neighbors}
+                />
             </div>
         );
     }
