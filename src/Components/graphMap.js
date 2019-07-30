@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { data } from './data';
+import CountdownTimer from 'react-component-countdown-timer';
+import uuid from 'uuid';
+
 class GraphMap extends Component {
     constructor(props){
         super()
     
         this.state = {
-            cooldown: null,
+            cooldown: 0,
             inventory: [],
             next_room_id: null,
             room_data: {
-                current_room_id: null,
+                current_room_id: 0,
                 previous_room_id: null,
                 exits: [],
                 items: [],
@@ -33,14 +37,15 @@ class GraphMap extends Component {
                 errors: [],
                 messages: []
             },
-            examined: {}
+            examined: {},
+            id: uuid,
         }
     }
 
 
 
     componentDidMount() {
-    this.getData();
+    this.getInit();
     }
 
     examineRoom = async name => {
@@ -128,6 +133,39 @@ class GraphMap extends Component {
         }
     };
 
+    getInit = async () => {
+        try {
+            let res = await axios({
+                method: 'get',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/init/`,
+                headers: {
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                }
+            });
+            console.log(res.data);
+    
+            this.setState({
+                cooldown: res.data.cooldown,
+                room_data: {
+                    current_room_id: res.data.room_id,
+                    previous_room_id: this.state.room_data.current_room_id,
+                    exits: res.data.exits,
+                    items: res.data.items,
+                    players: res.data.players,
+                    errors: res.data.errors,
+                    messages: res.data.messages,
+                    title: res.data.title,
+                    description: res.data.description,
+                    coordinates: res.data.coordinates,
+                    elevation: res.data.elevation,
+                    terrain: res.data.terrain
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     pray = async () => {
         try {
             let res = await axios({
@@ -210,6 +248,7 @@ class GraphMap extends Component {
                 data
             });
             console.log(res.data);
+            console.table('State', this.state.cooldown);
             
             this.setState({
                 cooldown: res.data.cooldown,
@@ -226,8 +265,11 @@ class GraphMap extends Component {
                     coordinates: res.data.coordinates,
                     elevation: res.data.elevation,
                     terrain: res.data.terrain,
-                }
+                },
+                id: uuid,
             })
+
+            console.table('State', this.state.cooldown);
         
             // setTimeout(() => {
             //   this.getData();
@@ -244,10 +286,34 @@ class GraphMap extends Component {
                 {this.state.room_data.items.includes('shrine') ? (
                     <button onClick={() => this.pray()}>Pray</button>
                 ) : null}
-                <button onClick={() => this.movement('n')}>North</button>
-                <button onClick={() => this.movement('s')}>South</button>
-                <button onClick={() => this.movement('w')}>West</button>
-                <button onClick={() => this.movement('e')}>East</button>
+                <button
+                    onClick={() =>
+                        this.movement('n', data[this.state.room_data.current_room_id][1].n)
+                    }
+                >
+                    North
+                </button>
+                <button
+                    onClick={() =>
+                    this.movement('s', data[this.state.room_data.current_room_id][1].s)
+                    }
+                >
+                    South
+                </button>
+                <button
+                    onClick={() =>
+                        this.movement('w', data[this.state.room_data.current_room_id][1].w)
+                    }
+                >
+                    West
+                </button>
+                <button
+                    onClick={() =>
+                        this.movement('e', data[this.state.room_data.current_room_id][1].e)
+                    }
+                >
+                    East
+                </button>
                 <button onClick={() => this.examineRoom('player78')} >Examine #78</button>
                 <button onClick={() => this.treasure_pickup('tiny treasure')}>
                     Take tiny treasure
@@ -255,6 +321,15 @@ class GraphMap extends Component {
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
                     Drop tiny treasure
                 </button>
+                <div>
+                    {this.state.room_data.exits.map(exit => (
+                        <p key={exit}>
+                            {exit}
+
+                            <CountdownTimer key={exit} count={this.state.cooldown} />
+                        </p>
+                    ))}
+                </div>
             </div>
         );
     }
