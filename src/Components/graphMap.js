@@ -1,6 +1,42 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 class GraphMap extends Component {
+    constructor(props){
+        super()
+    
+        this.state = {
+            cooldown: null,
+            inventory: [],
+            room_data: {
+                current_room: 0,
+                previous_room: null,
+                exits: [],
+                items: [],
+                players: [],
+                errors: [],
+                messages: [],
+                title: null,
+                description: null,
+                coordinates: null,
+                elevation: null,
+                terrain: '',
+            },
+            player_status: {
+                name: '',
+                encumberance: null,
+                strength: 10,
+                speed: 10,
+                gold: null,
+                inventory: [],
+                status: [],
+                errors: [],
+                messages: [],
+            }
+        }
+    }
+
+
+
     componentDidMount() {
     this.getData();
     }
