@@ -4,9 +4,6 @@ import GraphMap from './graphMap'
 // import secToken from '../Components/tokens/Token'
 
 class DataDisplay extends Component {
-    constructor(props){
-        super(props)
-    }
 
     render() {
         return(
