@@ -1,4 +1,4 @@
-export const data = {
+export const datajson = {
     '0': [{ x: 60, y: 60 }, { n: 10, s: 2, e: 4, w: 1 }],
     '1': [{ x: 59, y: 60 }, { e: 0 }],
     '2': [{ x: 60, y: 59 }, { n: 0, s: 6, e: 3 }],
