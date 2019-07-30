@@ -3,6 +3,7 @@ import axios from 'axios';
 import { datajson } from './data';
 import CountdownTimer from 'react-component-countdown-timer';
 import uuid from 'uuid';
+import Graph from './graph'
 
 class GraphMap extends Component {
     constructor(props){
@@ -39,17 +40,31 @@ class GraphMap extends Component {
             },
             examined: {},
             id: uuid,
+            coordinates: []
         }
     }
 
 
 
     componentDidMount() {
-    this.getInit();
+        this.getInit();
+        this.getCoords(datajson)
+    }
+
+    getCoords = data => {
+        let coordinates = []
+        for (let key in data){
+            coordinates.push({x: data[key][0]['x'], y: data[key][0]['y']})
+            console.log(data[key[0]])
+        }
+        console.log('COORDINATES', coordinates)
+        this.setState({
+            coordinates
+        })
     }
 
     examineRoom = async name => {
-        let data = {name}
+        let data = { name: name.player };
     
         try {
             let res = await axios({
@@ -66,10 +81,10 @@ class GraphMap extends Component {
             this.setState({
                 cooldown: res.data.cooldown,
                 examined: {
-                name: res.data.name,
-                description: res.data.description,
-                errors: res.data.errors,
-                messages: res.data.messages
+                    name: res.data.name,
+                    description: res.data.description,
+                    errors: res.data.errors,
+                    messages: res.data.messages
                 }
             })
     
@@ -183,7 +198,7 @@ class GraphMap extends Component {
     };
 
     treasure_pickup = async name => {
-        let data = { name };
+        let data = { name: name.item };
         try {
             let res = await axios({
                 method: 'post',
@@ -289,33 +304,43 @@ class GraphMap extends Component {
                         {exit}
                     </button>
                 ))}
-                {this.state.room_data.items === [] ? (
+                {this.state.room_data.items.length !== 0 ? (
                     this.state.room_data.items.map(item => (
                         <ul key={item}>
                             <li>Items in room:</li>
-                                <li>{item}</li>
+                            <button onClick={() => this.treasure_pickup({ item })}>
+                                pick up: {item}
+                            </button>
                         </ul>
                     ))
                 ) : (
                     <p>This room contains no items</p>
                 )}
-                {this.state.room_data.players === [] ? (
+                {this.state.room_data.players.length !== 0 ? (
                     this.state.room_data.players.map(player => (
                         <ul key={player}>
                             <li>Players in room:</li>
-                            <li>{player}</li>
+                            <button onClick={() => this.examineRoom({ player })}>
+                                {player}
+                            </button>
                         </ul>
                     ))
                 ) : (
                     <p>You are alone in this room</p>
                 )}
-                <button onClick={() => this.examineRoom('player78')} >Examine #78</button>
-                <button onClick={() => this.treasure_pickup('tiny treasure')}>
-                    Take tiny treasure
-                </button>
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
                     Drop tiny treasure
                 </button>
+
+                <div>
+                    {this.state.room_data.exits.map(exit => (
+                        <p key={exit}>
+                            {exit}
+                            <CountdownTimer key={exit} count={this.state.cooldown} />
+                        </p>
+                        ))}
+                </div>
+                <Graph coordinates={this.state.coordinates}/>
             </div>
         );
     }
