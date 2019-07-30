@@ -17,12 +17,13 @@ const Button = styled.button`
     display: inline-block;
     &:hover {
     background-color: #6FC6FF;
-`;
+    }
+`
 
 const URL = process.env.URL
 
 const config = {
-    headers: {Authorization: secToken}
+    headers: { Authorization: secToken }
 }
 
 class Traversal extends Component {
@@ -41,7 +42,9 @@ class Traversal extends Component {
             errors: [],
             roomData: {},
             graph: [],
-            items: []
+            items: [],
+            path: [],
+            value: null
         }
     }
 
