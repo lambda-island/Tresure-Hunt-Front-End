@@ -32,7 +32,8 @@ class GraphMap extends Component {
                 status: [],
                 errors: [],
                 messages: [],
-            }
+            },
+            examined: {}
         }
     }
 
@@ -40,6 +41,36 @@ class GraphMap extends Component {
 
     componentDidMount() {
     this.getData();
+    }
+
+    examineRoom = async (name) => {
+        let data = {name}
+    
+        try {
+            let res = await axios({
+                method: 'post',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/`,
+                headers: {
+                    Authorization: 'Token 4b0963db718e09fbe815d75150d98d79d9a243bb'
+                },
+                data
+            });
+    
+            console.log(res.data)
+    
+            this.setState({
+                cooldown: res.data.cooldown,
+                examined: {
+                name: res.data.name,
+                description: res.data.description,
+                errors: res.data.errors,
+                messages: res.data.messages
+                }
+            })
+    
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     getData = async () => {
@@ -74,7 +105,6 @@ class GraphMap extends Component {
                 }
             })
 
-            return res.data;
         } catch (err) {
             console.error(err);
         }
@@ -121,7 +151,6 @@ class GraphMap extends Component {
                 }
             })
         
-            console.log('STATE:', this.state)
             // setTimeout(() => {
             //   this.getData();
             // }, res.data.cooldown * 1000);
@@ -138,6 +167,7 @@ class GraphMap extends Component {
                 <button onClick={() => this.movement('s')}>South</button>
                 <button onClick={() => this.movement('w')}>West</button>
                 <button onClick={() => this.movement('e')}>East</button>
+                <button onClick={() => this.examineRoom('player78')} >Examine #78</button>
             </div>
         );
     }
