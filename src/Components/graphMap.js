@@ -20,7 +20,7 @@ class GraphMap extends Component {
                 description: null,
                 coordinates: null,
                 elevation: null,
-                terrain: '',
+                terrain: ''
             },
             player_status: {
                 name: '',
@@ -31,7 +31,7 @@ class GraphMap extends Component {
                 inventory: [],
                 status: [],
                 errors: [],
-                messages: [],
+                messages: []
             },
             examined: {}
         }
@@ -43,7 +43,7 @@ class GraphMap extends Component {
     this.getData();
     }
 
-    examineRoom = async (name) => {
+    examineRoom = async name => {
         let data = {name}
     
         try {
@@ -51,7 +51,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/`,
                 headers: {
-                    Authorization: 'Token 4b0963db718e09fbe815d75150d98d79d9a243bb'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -72,6 +72,24 @@ class GraphMap extends Component {
             console.error(err);
         }
     }
+    // TODO: Figure out what/where the name changer is!!
+    // nameChanger = async (newName) => {
+    //     let data = {newName}
+
+    //     try {
+    //         let res = await axios({
+    //             method: 'post',
+    //             url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/change_name/',
+    //             headers: {
+    //                 Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+    //             }
+    //         });
+    //         this.setState({
+    //             name: res.data.
+    //         })
+    //     }
+
+    // }
 
     getData = async () => {
         try {
@@ -110,6 +128,66 @@ class GraphMap extends Component {
         }
     };
 
+    pray = async () => {
+        try {
+            let res = await axios({
+                method: 'post',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/pray/`,
+                headers: {
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                }
+            });
+            // TODO: When we find a shrine figure out the res data
+            console.log(res.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    treasure_pickup = async name => {
+        let data = { name };
+        try {
+            let res = await axios({
+                method: 'post',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/take/`,
+                headers: {
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                },
+                data
+            });
+            this.setState({
+                cooldown: res.data.cooldown
+            });
+            console.log('picked up', { name });
+            console.log('cooldown', this.state.cooldown);
+            // TODO: Call status
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    treasure_drop = async name => {
+        let data = { name };
+        try {
+            let res = await axios({
+                method: 'post',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/drop/`,
+                headers: {
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                },
+                data
+            });
+            this.setState({
+                cooldown: res.data.cooldown
+            });
+            console.log('dropped', { name });
+            console.log('cooldown', this.state.cooldown);
+            // TODO: Call status
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     movement = async (move, next_room_id = null) => {
         let data;
         if (next_room_id !== null) {
@@ -127,7 +205,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/move/`,
                 headers: {
-                Authorization: 'Token 4b0963db718e09fbe815d75150d98d79d9a243bb'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -163,11 +241,20 @@ class GraphMap extends Component {
     render() {
         return (
             <div>
+                {this.state.room_data.items.includes('shrine') ? (
+                    <button onClick={() => this.pray()}>Pray</button>
+                ) : null}
                 <button onClick={() => this.movement('n')}>North</button>
                 <button onClick={() => this.movement('s')}>South</button>
                 <button onClick={() => this.movement('w')}>West</button>
                 <button onClick={() => this.movement('e')}>East</button>
                 <button onClick={() => this.examineRoom('player78')} >Examine #78</button>
+                <button onClick={() => this.treasure_pickup('tiny treasure')}>
+                    Take tiny treasure
+                </button>
+                <button onClick={() => this.treasure_drop('tiny treasure')}>
+                    Drop tiny treasure
+                </button>
             </div>
         );
     }
