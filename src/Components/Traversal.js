@@ -39,7 +39,7 @@ class Traversal extends Component {
             reverseDirection: {n: 's', s: 'n', w: 'e', e: 'w'},
             description: '',
             messages: [],
-            cooldown: 0,
+            cooldown: 15,
             errors: [],
             roomData: {},
             graph: [],
@@ -55,12 +55,25 @@ class Traversal extends Component {
             let value = JSON.parse(localStorage.getItem('graph'))
             this.setState({graph: value})
         }
+        this.getInfo()
     }
 
     // Initialize the graph
 
     // Travel
-    travel = async move => {
+    travel = async (move, next_room_id = null) => {
+        let data;
+        if (next_room_id !== null) {
+            data = {
+                direction: move,
+                next_room_id: toString(next_room_id)
+            }
+        } else {
+            data = {
+                direction: move
+            }
+        }
+
         try {
             const response = await axios({
                 method: 'post',
@@ -68,10 +81,7 @@ class Traversal extends Component {
                 headers: {
                     Authorization: secToken
                 },
-                data: {
-                    direction: move,
-                    next_room_id: this.state.value
-                }
+                data
             })
             let prev_room_id = this.state.room_id
             let graph = this.updataGraph(
@@ -93,6 +103,7 @@ class Traversal extends Component {
                 title: response.data.title,
                 players: response.data.players,
                 messages: response.data.messages,
+                value: '',
                 graph
             })
             console.log(response.data)
@@ -114,8 +125,9 @@ class Traversal extends Component {
             payload.push(moves)
             graph = {...graph, [id]: payload}
         }
-        if (prev_room_id && move) {
+        if (prev_room_id !== null && prev_room_id !== id) {
             graph[prev_room_id][1][move]= id
+            graph[id][1][reverseDirection[move]] = prev_room_id
         }
         localStorage.setItem('graph', JSON.stringify(graph))
         return graph
@@ -126,7 +138,44 @@ class Traversal extends Component {
         if (unknowExits.length) {
             let move = unknowExits[0]
             this.travel(move)
+        } else {
+            clearInterval(this.interval)
+            let path = this.bft()
+            let count = 1
+            for (let direction of path) {
+                for (let d in direction) {
+                    setTimeout(() => {
+                        this.travel(d)
+                    }, this.state.cooldown * 1000 * count)
+                    count = count + 1
+                }
+            }
+            this.interval = setInterval(
+                this.traverseMap,
+                this.state.cooldown * 1000 * count
+            )
+            count = 1
         }
+        this.updateVisited()
+    }
+
+    updateVisited = () => {
+        let visited = new Set(this.state.set)
+        for (let key in this.state.graph) {
+            if (!visited.has(key)) {
+                let temp = []
+                for (let direction in key) {
+                    if (key[direction] === '?') {
+                        temp.push(direction)
+                    }
+                }
+                if (!temp.length) {
+                    visited.add(key)
+                }
+            }
+        }
+        let countVisited = visited.size / 500;
+        this.setState({visited, countVisited})
     }
 
     getUnkownExits = () => {
@@ -173,6 +222,7 @@ class Traversal extends Component {
                         roomData: res.data,
                         graph
                     })
+                    this.updateVisited()
                 }
             })
             .catch(err => {
@@ -181,7 +231,7 @@ class Traversal extends Component {
     }
 
     getItem = async () => {
-        let {tresure} = this.state.items
+        let tresure = this.state.items
         
         try {
             await axios({
@@ -203,6 +253,7 @@ class Traversal extends Component {
     handleChange = (event) => {
         this.setState({value: event.target.value})
     }
+
 
     render() {
         return (
