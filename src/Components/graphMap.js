@@ -8,8 +8,8 @@ class GraphMap extends Component {
     getData = async () => {
         try {
             let res = await axios({
-                url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/init/',
-                method: 'get',
+                url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/status/',
+                method: 'post',
                 timeout: 8000,
                 headers: {
                     Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
@@ -29,8 +29,45 @@ class GraphMap extends Component {
         }
     };
 
+    movement = async (move, next_room_id = null) => {
+        let data;
+        if (next_room_id !== null) {
+            data = {
+            direction: move,
+            next_room_id: next_room_id.toString()
+            };
+        } else {
+            data = {
+                direction: move
+            };
+        }
+        try {
+            let res = await axios({
+                method: 'post',
+                url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/move/`,
+                headers: {
+                Authorization: 'Token 4b0963db718e09fbe815d75150d98d79d9a243bb'
+                },
+                data
+            });
+            console.log(res.data);
+            setTimeout(() => {
+                this.getData();
+            }, res.data.cooldown * 1000);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     render() {
-        return <div />;
+        return (
+            <div>
+                <button onClick={() => this.movement('n')}>North</button>
+                <button onClick={() => this.movement('s')}>South</button>
+                <button onClick={() => this.movement('w')}>West</button>
+                <button onClick={() => this.movement('e')}>East</button>
+            </div>
+        );
     }
 }
 
