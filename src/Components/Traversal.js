@@ -254,6 +254,40 @@ class Traversal extends Component {
         this.setState({value: event.target.value})
     }
 
+    // Breadth First Search Traversal
+    bft = (start = this.state.room_id, target = '?') => {
+        let {graph} = this.state;
+        let queue = []
+        let visited = new Set()
+        for (let room in graph[start][1]) {
+            queue = [...queue, [{[room]: graph[start][1][room]}]]
+        }
+        while (queue.length) {
+            let dequeued = queue.shift()
+            let last_room = dequeued[dequeued.length -1]
+
+            for (let exit in last_room) {
+                if (last_room[exit] === target) {
+                    dequeued.pop()
+                    return dequeued
+                } else {
+                    visited.add(last_room[exit])
+
+                    for (let path in graph[last_room[exit][1]]) {
+                        if (visited.has(graph[last_room[exit][1][path]]) === false) {
+                            let path_copy = Array.from(dequeued)
+                            path_copy.push({[path]: graph[last_room[exit]][1][path]})
+                            queue.push(path_copy)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    handleClick = () => {
+        this.interval = setInterval(this.traverseMap, this.state.cooldown * 1000)
+    }
 
     render() {
         return (
