@@ -4,6 +4,7 @@ import secToken from './tokens/Token'
 import axios from 'axios'
 import styled from 'styled-components'
 import { isNull } from 'util'
+import { throws } from 'assert';
 
 
 const Button = styled.button`
@@ -68,7 +69,8 @@ class Traversal extends Component {
                     Authorization: secToken
                 },
                 data: {
-                    direction: move
+                    direction: move,
+                    next_room_id: this.state.value
                 }
             })
             let prev_room_id = this.state.room_id
@@ -178,24 +180,28 @@ class Traversal extends Component {
             })
     }
 
-    getItem = async() => {
+    getItem = async () => {
         let {tresure} = this.state.items
-        if (this.state.items.length) {
-            try {
-                const response = await axios({
-                    method: 'post',
-                    url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/take/',
-                    headers: {
-                        Authorization: secToken
-                    },
-                    data: {
-                        name: tresure
-                    }
-                })
-            } catch (err) {
-                console.log(err)
-            }
+        
+        try {
+            await axios({
+                method: 'post',
+                url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/take/',
+                headers: {
+                    Authorization: secToken
+                },
+                data: {
+                    name: tresure
+                }
+            })
+        } catch (err) {
+            console.log(err)
         }
+        
+    }
+
+    handleChange = (event) => {
+        this.setState({value: event.target.value})
     }
 
     render() {
@@ -209,6 +215,11 @@ class Traversal extends Component {
                 <Button onClick={() => this.travel('w')}>West</Button>
                 <Button onClick={() => this.traverseMap()}>AutoTraverse</Button>
                 <Button onClick={() => this.getItem()}>Pick Up Treasure</Button>
+                <form>
+                    <label>
+                        Next Room ID: <input type='number' value={this.state.value} onChange={this.handleChange} />
+                    </label>
+                </form>
             </React.Fragment>
         )
     }
