@@ -4,13 +4,57 @@ import { datajson } from './data';
 import CountdownTimer from 'react-component-countdown-timer';
 import uuid from 'uuid';
 import Graph from './graph'
+import Styled from 'styled-components'
+import Players from './players'
+import Loader from 'react-loader-spinner'
+import Nav from './nav'
+
+
+const Main = Styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+`
+
+const GraphWrapper = Styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const DirectionWrapper = Styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 20px;
+    max-height: 100%;
+    border-left: 2px solid black;
+`
+
+const keyName = {
+    '07bd865cf1d2e3c39f850fa619c85db565ff6b18': 'Yanrong',
+    '7621d986e07671e24abdf324cc6c7237a8709aa5': 'Brandon',
+    'b7e291bd1c048cad979b3e484a17c0f75b405e58': 'Dylan'
+}
+
+const nameKey = {
+    'Yanrong': '07bd865cf1d2e3c39f850fa619c85db565ff6b18',
+    'Brandon': '7621d986e07671e24abdf324cc6c7237a8709aa5',
+    'Dylan': 'b7e291bd1c048cad979b3e484a17c0f75b405e58'
+}
 
 class GraphMap extends Component {
     constructor(props){
         super()
-    
+        
+        this.interval = null
+
         this.state = {
             cooldown: 0,
+            activeCooldown: false,
             inventory: [],
             next_room_id: -1,
             room_data: {
@@ -41,15 +85,35 @@ class GraphMap extends Component {
             examined: {},
             id: uuid,
             coordinates: [],
-            neighbors: []
+            neighbors: [],
+            character: Object.keys(nameKey),
+            IdsCharacter: Object.values(nameKey),
+            currentPlayer: null
         }
     }
 
 
 
     componentDidMount() {
-        this.getInit();
+        // this.getInit();
         this.getCoords(datajson)
+        if (this.state.activeCooldown) {
+            this.checkCooldown()
+        }
+    }
+
+    componentDidUpdate() {
+        console.log('cooldown:', this.state.cooldown)
+        clearInterval(this.interval)
+        if (this.state.cooldown > 0) {
+            this.interval = setInterval(() => this.setState({
+                cooldown: this.state.cooldown - 1
+            }), 1000)
+        } else if (this.state.activeCooldown === true) {
+            this.setState({
+                activeCooldown: false
+            })
+        }
     }
 
     getCoords = data => {
@@ -59,15 +123,13 @@ class GraphMap extends Component {
             coordinates.push({x: data[key][0]['x'], y: data[key][0]['y'], id: key})
             neighbors.push(data[key][1])
         }
-        console.log('COORDINATES', coordinates)
-        console.log('neighbors', neighbors)
         this.setState({
             coordinates,
             neighbors
         })
     }
 
-    examineRoom = async name => {
+    examineRoom = async (name, token = this.state.currentPlayer) => {
         let data = { name: name.player };
     
         try {
@@ -75,7 +137,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: `Token `
                 },
                 data
             });
@@ -165,6 +227,7 @@ class GraphMap extends Component {
     
             this.setState({
                 cooldown: res.data.cooldown,
+                activeCooldown: true,
                 room_data: {
                     current_room_id: res.data.room_id,
                     previous_room_id: this.state.room_data.current_room_id,
@@ -184,6 +247,15 @@ class GraphMap extends Component {
             console.log(err);
         }
     };
+
+    checkCooldown = () => {
+        console.log('cooldown off') 
+        setTimeout(() => {
+            console.log('cooldown', this.state.cooldown)
+            console.log('set activecooldown to false')
+            this.setState({activeCooldown: false})
+        }, this.state.cooldown * 1000)
+    }
 
     pray = async () => {
         try {
@@ -300,15 +372,30 @@ class GraphMap extends Component {
 
     render() {
         return (
-            <div>
-                {this.state.room_data.items.includes('shrine') ? (
+            <Main>
+                <DirectionWrapper>
+                {/* {this.state.room_data.items.includes('shrine') ? (
                     <button onClick={() => this.pray()}>Pray</button>
                 ) : null}
                 {this.state.room_data.exits.map(exit => (
                     <button onClick={() => this.movement({ exit })} key={exit}>
                         {exit}
                     </button>
-                ))}
+                ))} */}
+                {this.state.activeCooldown && (
+                    <>
+                        <h1>Cooldown: {this.state.cooldown}</h1>
+                        <Loader type='Puff' color='red' height='150' width='150' />
+                    </>
+                )}
+                {!this.state.activeCooldown && (
+                    <>
+                        <Nav
+                            exits={this.state.room_data.exits}
+                            movement={(exit) => this.movement(exit)}
+                        />
+                    </>
+                )}
                 {this.state.room_data.items.length !== 0 ? (
                     this.state.room_data.items.map(item => (
                         <ul key={item}>
@@ -321,37 +408,38 @@ class GraphMap extends Component {
                 ) : (
                     <p>This room contains no items</p>
                 )}
-                {this.state.room_data.players.length !== 0 ? (
-                    this.state.room_data.players.map(player => (
-                        <ul key={player}>
-                            <li>Players in room:</li>
-                            <button onClick={() => this.examineRoom({ player })}>
-                                {player}
-                            </button>
-                        </ul>
-                    ))
-                ) : (
-                    <p>You are alone in this room</p>
-                )}
+                <Players 
+                    players = {this.state.room_data.players}
+                    examineRoom = {() => this.examineRoom()}
+                    currentRoom = {this.state.room_data.current_room_id}
+                    title = {this.state.room_data.title}
+                />
+
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
                     Drop tiny treasure
                 </button>
+                {/* <CountdownTimer count={this.state.cooldown} /> */}
 
-                <div>
+                {/* <div>
                     {this.state.room_data.exits.map(exit => (
                         <p key={exit}>
                             {exit}
                             <CountdownTimer key={exit} count={this.state.cooldown} />
                         </p>
                         ))}
-                </div>
-                <Graph
-                    nextRoom={this.state.next_room_id}
-                    roomId = {this.state.room_data.current_room_id}
-                    coordinates={this.state.coordinates}
-                    neighbors={this.state.neighbors}
-                />
-            </div>
+                </div> */}
+                <p>Messages: {this.state.room_data.messages}</p>
+                <p>Description: {this.state.room_data.description}</p>
+                </DirectionWrapper>
+                <GraphWrapper>
+                    <Graph
+                        nextRoom={this.state.next_room_id}
+                        roomId = {this.state.room_data.current_room_id}
+                        coordinates={this.state.coordinates}
+                        neighbors={this.state.neighbors}
+                    />
+                </GraphWrapper>
+            </Main>
         );
     }
 }
