@@ -12,9 +12,9 @@ class GraphMap extends Component {
         this.state = {
             cooldown: 0,
             inventory: [],
-            next_room_id: null,
+            next_room_id: -1,
             room_data: {
-                current_room_id: 0,
+                current_room_id: -1,
                 previous_room_id: null,
                 exits: [],
                 items: [],
@@ -56,7 +56,7 @@ class GraphMap extends Component {
         let coordinates = []
         let neighbors = []
         for (let key in data){
-            coordinates.push({x: data[key][0]['x'], y: data[key][0]['y']})
+            coordinates.push({x: data[key][0]['x'], y: data[key][0]['y'], id: key})
             neighbors.push(data[key][1])
         }
         console.log('COORDINATES', coordinates)
@@ -269,6 +269,7 @@ class GraphMap extends Component {
             
             this.setState({
                 cooldown: res.data.cooldown,
+                next_room_id: next,
                 room_data: {
                     current_room_id: res.data.room_id,
                     previous_room_id: this.state.room_data.current_room_id,
@@ -344,7 +345,9 @@ class GraphMap extends Component {
                         </p>
                         ))}
                 </div>
-                <Graph 
+                <Graph
+                    nextRoom={this.state.next_room_id}
+                    roomId = {this.state.room_data.current_room_id}
                     coordinates={this.state.coordinates}
                     neighbors={this.state.neighbors}
                 />
