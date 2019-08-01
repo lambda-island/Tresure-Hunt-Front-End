@@ -34,18 +34,6 @@ const DirectionWrapper = Styled.div`
     border-left: 2px solid black;
 `
 
-const keyName = {
-    '07bd865cf1d2e3c39f850fa619c85db565ff6b18': 'Yanrong',
-    '7621d986e07671e24abdf324cc6c7237a8709aa5': 'Brandon',
-    'b7e291bd1c048cad979b3e484a17c0f75b405e58': 'Dylan'
-}
-
-const nameKey = {
-    'Yanrong': '07bd865cf1d2e3c39f850fa619c85db565ff6b18',
-    'Brandon': '7621d986e07671e24abdf324cc6c7237a8709aa5',
-    'Dylan': 'b7e291bd1c048cad979b3e484a17c0f75b405e58'
-}
-
 class GraphMap extends Component {
     constructor(props){
         super()
@@ -85,17 +73,14 @@ class GraphMap extends Component {
             examined: {},
             id: uuid,
             coordinates: [],
-            neighbors: [],
-            character: Object.keys(nameKey),
-            IdsCharacter: Object.values(nameKey),
-            currentPlayer: null
+            neighbors: []
         }
     }
 
 
 
     componentDidMount() {
-        // this.getInit();
+        this.getInit();
         this.getCoords(datajson)
         if (this.state.activeCooldown) {
             this.checkCooldown()
@@ -129,7 +114,7 @@ class GraphMap extends Component {
         })
     }
 
-    examineRoom = async (name, token = this.state.currentPlayer) => {
+    examineRoom = async name => {
         let data = { name: name.player };
     
         try {
@@ -137,7 +122,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/`,
                 headers: {
-                    Authorization: `Token `
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 },
                 data
             });
@@ -167,7 +152,7 @@ class GraphMap extends Component {
     //             method: 'post',
     //             url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/change_name/',
     //             headers: {
-    //                 Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+    //                 Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
     //             }
     //         });
     //         this.setState({
@@ -184,7 +169,7 @@ class GraphMap extends Component {
                 method: 'post',
                 timeout: 8000,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 }
             });
             if (res.status === 200) {
@@ -220,7 +205,7 @@ class GraphMap extends Component {
                 method: 'get',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/init/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 }
             });
             console.log(res.data);
@@ -263,7 +248,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/pray/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 }
             });
             // TODO: When we find a shrine figure out the res data
@@ -280,7 +265,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/take/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 },
                 data
             });
@@ -302,7 +287,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/drop/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 },
                 data
             });
@@ -332,7 +317,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/move/`,
                 headers: {
-                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
+                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
                 },
                 data
             });
@@ -413,6 +398,7 @@ class GraphMap extends Component {
                     examineRoom = {() => this.examineRoom()}
                     currentRoom = {this.state.room_data.current_room_id}
                     title = {this.state.room_data.title}
+                    coor = {this.state.room_data.coordinates}
                 />
 
                 <button onClick={() => this.treasure_drop('tiny treasure')}>

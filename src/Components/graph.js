@@ -95,7 +95,7 @@ const Graph = props => {
                 context.stroke();
             }
 
-            if (coordinates[room]['id'] == roomId){
+            if (coordinates[room]['id'].toString() === roomId.toString()){
                 context.fillStyle = 'purple'
                 console.log('Coloring current location')
             } else {
@@ -111,7 +111,7 @@ const Graph = props => {
             context.fillStyle = 'black'
         }
 
-    }, [coordinates, roomId, nextRoom])
+    }, [coordinates, roomId, nextRoom, neighbors])
 
     return (
         <>
