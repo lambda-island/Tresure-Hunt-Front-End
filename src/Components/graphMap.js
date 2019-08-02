@@ -391,7 +391,7 @@ class GraphMap extends Component {
                         </ul>
                     ))
                 ) : (
-                    <p>This room contains no items</p>
+                    <p>There is nothing in the room</p>
                 )}
                 <Players 
                     players = {this.state.room_data.players}
@@ -402,7 +402,7 @@ class GraphMap extends Component {
                 />
 
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
-                    Drop tiny treasure
+                    Drop the treasure
                 </button>
                 {/* <CountdownTimer count={this.state.cooldown} /> */}
 
