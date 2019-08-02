@@ -45,12 +45,13 @@ const PlayerButton = Styled.button`
 
 const Players = props => {
 
-    const { players, examineRoom, currentRoom, title, coor } = props
+    const { players, examineRoom, currentRoom, title, coor, cooldown } = props
     return (
         <PlayerContainer>
         <p>Title: {title}</p>
         <p>Players in Room: {currentRoom}</p>
         <p>Coor: {coor}</p>
+        <p><b>Cooldown Time: {cooldown}</b></p>
         <PlayerList>
             {players.length !== 0 ? (
             players.map(player => (

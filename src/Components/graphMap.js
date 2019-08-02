@@ -399,6 +399,7 @@ class GraphMap extends Component {
                     currentRoom = {this.state.room_data.current_room_id}
                     title = {this.state.room_data.title}
                     coor = {this.state.room_data.coordinates}
+                    cooldown = {this.state.cooldown}
                 />
 
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
