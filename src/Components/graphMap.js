@@ -370,7 +370,7 @@ class GraphMap extends Component {
                 {this.state.activeCooldown && (
                     <>
                         <h1>Cooldown: {this.state.cooldown}</h1>
-                        <Loader type='Puff' color='red' height='150' width='150' />
+                        <Loader type='ThreeDots' color='red' height='150' width='150' />
                     </>
                 )}
                 {!this.state.activeCooldown && (
