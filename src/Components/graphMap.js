@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { datajson } from './data';
-import CountdownTimer from 'react-component-countdown-timer';
 import uuid from 'uuid';
 import Graph from './graph'
 import Styled from 'styled-components'
@@ -122,7 +121,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -143,24 +142,6 @@ class GraphMap extends Component {
             console.error(err);
         }
     }
-    // TODO: Figure out what/where the name changer is!!
-    // nameChanger = async (newName) => {
-    //     let data = {newName}
-
-    //     try {
-    //         let res = await axios({
-    //             method: 'post',
-    //             url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/change_name/',
-    //             headers: {
-    //                 Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
-    //             }
-    //         });
-    //         this.setState({
-    //             name: res.data.
-    //         })
-    //     }
-
-    // }
 
     getData = async () => {
         try {
@@ -169,7 +150,7 @@ class GraphMap extends Component {
                 method: 'post',
                 timeout: 8000,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 }
             });
             if (res.status === 200) {
@@ -205,7 +186,7 @@ class GraphMap extends Component {
                 method: 'get',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/init/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 }
             });
             console.log(res.data);
@@ -248,7 +229,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/pray/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 }
             });
             // TODO: When we find a shrine figure out the res data
@@ -265,7 +246,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/take/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -287,7 +268,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/drop/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -317,7 +298,7 @@ class GraphMap extends Component {
                 method: 'post',
                 url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/move/`,
                 headers: {
-                    Authorization: 'Token 7621d986e07671e24abdf324cc6c7237a8709aa5'
+                    Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
                 },
                 data
             });
@@ -359,14 +340,6 @@ class GraphMap extends Component {
         return (
             <Main>
                 <DirectionWrapper>
-                {/* {this.state.room_data.items.includes('shrine') ? (
-                    <button onClick={() => this.pray()}>Pray</button>
-                ) : null}
-                {this.state.room_data.exits.map(exit => (
-                    <button onClick={() => this.movement({ exit })} key={exit}>
-                        {exit}
-                    </button>
-                ))} */}
                 {this.state.activeCooldown && (
                     <>
                         <h1>Cooldown: {this.state.cooldown}</h1>
@@ -405,16 +378,6 @@ class GraphMap extends Component {
                 <button onClick={() => this.treasure_drop('tiny treasure')}>
                     Drop the treasure
                 </button>
-                {/* <CountdownTimer count={this.state.cooldown} /> */}
-
-                {/* <div>
-                    {this.state.room_data.exits.map(exit => (
-                        <p key={exit}>
-                            {exit}
-                            <CountdownTimer key={exit} count={this.state.cooldown} />
-                        </p>
-                        ))}
-                </div> */}
                 <p>Messages: {this.state.room_data.messages}</p>
                 <p>Description: {this.state.room_data.description}</p>
                 </DirectionWrapper>
