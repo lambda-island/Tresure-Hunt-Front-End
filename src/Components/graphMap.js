@@ -1,20 +1,51 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { datajson } from './data';
-import CountdownTimer from 'react-component-countdown-timer';
 import uuid from 'uuid';
 import Graph from './graph'
+import Styled from 'styled-components'
+import Players from './players'
+import Loader from 'react-loader-spinner'
+import Nav from './nav'
+
+
+const Main = Styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+`
+
+const GraphWrapper = Styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const DirectionWrapper = Styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 20px;
+    max-height: 100%;
+    border-left: 2px solid black;
+`
 
 class GraphMap extends Component {
     constructor(props){
         super()
-    
+        
+        this.interval = null
+
         this.state = {
             cooldown: 0,
+            activeCooldown: false,
             inventory: [],
-            next_room_id: null,
+            next_room_id: -1,
             room_data: {
-                current_room_id: 0,
+                current_room_id: -1,
                 previous_room_id: null,
                 exits: [],
                 items: [],
@@ -50,17 +81,32 @@ class GraphMap extends Component {
     componentDidMount() {
         this.getInit();
         this.getCoords(datajson)
+        if (this.state.activeCooldown) {
+            this.checkCooldown()
+        }
+    }
+
+    componentDidUpdate() {
+        console.log('cooldown:', this.state.cooldown)
+        clearInterval(this.interval)
+        if (this.state.cooldown > 0) {
+            this.interval = setInterval(() => this.setState({
+                cooldown: this.state.cooldown - 1
+            }), 1000)
+        } else if (this.state.activeCooldown === true) {
+            this.setState({
+                activeCooldown: false
+            })
+        }
     }
 
     getCoords = data => {
         let coordinates = []
         let neighbors = []
         for (let key in data){
-            coordinates.push({x: data[key][0]['x'], y: data[key][0]['y']})
+            coordinates.push({x: data[key][0]['x'], y: data[key][0]['y'], id: key})
             neighbors.push(data[key][1])
         }
-        console.log('COORDINATES', coordinates)
-        console.log('neighbors', neighbors)
         this.setState({
             coordinates,
             neighbors
@@ -96,24 +142,6 @@ class GraphMap extends Component {
             console.error(err);
         }
     }
-    // TODO: Figure out what/where the name changer is!!
-    // nameChanger = async (newName) => {
-    //     let data = {newName}
-
-    //     try {
-    //         let res = await axios({
-    //             method: 'post',
-    //             url: 'https://lambda-treasure-hunt.herokuapp.com/api/adv/change_name/',
-    //             headers: {
-    //                 Authorization: 'Token 07bd865cf1d2e3c39f850fa619c85db565ff6b18'
-    //             }
-    //         });
-    //         this.setState({
-    //             name: res.data.
-    //         })
-    //     }
-
-    // }
 
     getData = async () => {
         try {
@@ -165,6 +193,7 @@ class GraphMap extends Component {
     
             this.setState({
                 cooldown: res.data.cooldown,
+                activeCooldown: true,
                 room_data: {
                     current_room_id: res.data.room_id,
                     previous_room_id: this.state.room_data.current_room_id,
@@ -184,6 +213,15 @@ class GraphMap extends Component {
             console.log(err);
         }
     };
+
+    checkCooldown = () => {
+        console.log('cooldown off') 
+        setTimeout(() => {
+            console.log('cooldown', this.state.cooldown)
+            console.log('set activecooldown to false')
+            this.setState({activeCooldown: false})
+        }, this.state.cooldown * 1000)
+    }
 
     pray = async () => {
         try {
@@ -269,6 +307,7 @@ class GraphMap extends Component {
             
             this.setState({
                 cooldown: res.data.cooldown,
+                next_room_id: next,
                 room_data: {
                     current_room_id: res.data.room_id,
                     previous_room_id: this.state.room_data.current_room_id,
@@ -299,15 +338,22 @@ class GraphMap extends Component {
 
     render() {
         return (
-            <div>
-                {this.state.room_data.items.includes('shrine') ? (
-                    <button onClick={() => this.pray()}>Pray</button>
-                ) : null}
-                {this.state.room_data.exits.map(exit => (
-                    <button onClick={() => this.movement({ exit })} key={exit}>
-                        {exit}
-                    </button>
-                ))}
+            <Main>
+                <DirectionWrapper>
+                {this.state.activeCooldown && (
+                    <>
+                        <h1>Cooldown: {this.state.cooldown}</h1>
+                        <Loader type='ThreeDots' color='red' height='150' width='150' />
+                    </>
+                )}
+                {!this.state.activeCooldown && (
+                    <>
+                        <Nav
+                            exits={this.state.room_data.exits}
+                            movement={(exit) => this.movement(exit)}
+                        />
+                    </>
+                )}
                 {this.state.room_data.items.length !== 0 ? (
                     this.state.room_data.items.map(item => (
                         <ul key={item}>
@@ -318,37 +364,32 @@ class GraphMap extends Component {
                         </ul>
                     ))
                 ) : (
-                    <p>This room contains no items</p>
+                    <p>There is nothing in the room</p>
                 )}
-                {this.state.room_data.players.length !== 0 ? (
-                    this.state.room_data.players.map(player => (
-                        <ul key={player}>
-                            <li>Players in room:</li>
-                            <button onClick={() => this.examineRoom({ player })}>
-                                {player}
-                            </button>
-                        </ul>
-                    ))
-                ) : (
-                    <p>You are alone in this room</p>
-                )}
-                <button onClick={() => this.treasure_drop('tiny treasure')}>
-                    Drop tiny treasure
-                </button>
-
-                <div>
-                    {this.state.room_data.exits.map(exit => (
-                        <p key={exit}>
-                            {exit}
-                            <CountdownTimer key={exit} count={this.state.cooldown} />
-                        </p>
-                        ))}
-                </div>
-                <Graph 
-                    coordinates={this.state.coordinates}
-                    neighbors={this.state.neighbors}
+                <Players 
+                    players = {this.state.room_data.players}
+                    examineRoom = {() => this.examineRoom()}
+                    currentRoom = {this.state.room_data.current_room_id}
+                    title = {this.state.room_data.title}
+                    coor = {this.state.room_data.coordinates}
+                    cooldown = {this.state.cooldown}
                 />
-            </div>
+
+                <button onClick={() => this.treasure_drop('tiny treasure')}>
+                    Drop the treasure
+                </button>
+                <p>Messages: {this.state.room_data.messages}</p>
+                <p>Description: {this.state.room_data.description}</p>
+                </DirectionWrapper>
+                <GraphWrapper>
+                    <Graph
+                        nextRoom={this.state.next_room_id}
+                        roomId = {this.state.room_data.current_room_id}
+                        coordinates={this.state.coordinates}
+                        neighbors={this.state.neighbors}
+                    />
+                </GraphWrapper>
+            </Main>
         );
     }
 }

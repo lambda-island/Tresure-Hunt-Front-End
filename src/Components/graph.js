@@ -5,7 +5,7 @@ import { useRef, useEffect } from 'react'
 
 const Graph = props => {
     const ref = useRef()
-    const { coordinates, neighbors  } = props;
+    const { coordinates, neighbors, roomId, nextRoom  } = props;
 
     useEffect(() => {
         // console.log(coordinates)
@@ -33,42 +33,85 @@ const Graph = props => {
 
         for (let room in coordinates){
             // console.log(coordinates[room]['x'])
-            context.fillRect(transX(coordinates[room]['x']), transY(coordinates[room]['y']), 5, 5)
+            let widthBox = 10;
+            let heightBox = 10;
 
-            if (neighbors[room]['n']){
-                let direction = neighbors[room]['n']
-                context.beginPath()
-                context.moveTo(transX(coordinates[room]['x']) + 2.5, transY(coordinates[room]['y']))
-                context.lineTo(transX(coordinates[direction]['x']) + 2.5, transY(coordinates[direction]['y']) + 5)
-                context.stroke()  
+
+            if (neighbors[room]['n']) {
+                let direction = neighbors[room]['n'];
+                context.beginPath();
+                context.moveTo(
+                    transX(coordinates[room]['x']) + widthBox / 2,
+                    transY(coordinates[room]['y'])
+                );
+                context.lineTo(
+                    transX(coordinates[direction]['x']) + widthBox / 2,
+                    transY(coordinates[direction]['y']) + widthBox
+                );
+                context.stroke();
+                context.strokeStyle = 'green';
+                context.lineWidth = '1';
             }
-            if (neighbors[room]['s']){
-                let direction = neighbors[room]['s']
-                context.beginPath()
-                context.moveTo(transX(coordinates[room]['x']) + 2.5, transY(coordinates[room]['y']) + 5)
-                context.lineTo(transX(coordinates[direction]['x']) + 2.5, transY(coordinates[direction]['y']) + 5)
-                context.stroke()  
+
+            if (neighbors[room]['s']) {
+                let direction = neighbors[room]['s'];
+                context.beginPath();
+                context.moveTo(
+                    transX(coordinates[room]['x']) + widthBox / 2,
+                    transY(coordinates[room]['y']) + widthBox
+                )
+                context.lineTo(
+                    transX(coordinates[direction]['x']) + widthBox / 2,
+                    transY(coordinates[direction]['y']) + widthBox
+                )
+                context.stroke()
             }
-            if (neighbors[room]['e']){
-                let direction = neighbors[room]['e']
-                context.beginPath()
-                context.moveTo(transX(coordinates[room]['x']) + 5, transY(coordinates[room]['y']) + 2.5)
-                context.lineTo(transX(coordinates[direction]['x']), transY(coordinates[direction]['y']) + 2.5)
-                context.stroke()  
+
+            if (neighbors[room]['e']) {
+                let direction = neighbors[room]['e'];
+                context.beginPath();
+                context.moveTo(
+                    transX(coordinates[room]['x']) + widthBox,
+                    transY(coordinates[room]['y']) + widthBox / 2
+                )
+                context.lineTo(
+                    transX(coordinates[direction]['x']),
+                    transY(coordinates[direction]['y']) + widthBox / 2
+                )
+                context.stroke();
             }
-            if (neighbors[room]['w']){
+
+            if (neighbors[room]['w']) {
                 let direction = neighbors[room]['w']
                 context.beginPath()
-                context.moveTo(transX(coordinates[room]['x']), transY(coordinates[room]['y']) + 2.5)
-                context.lineTo(transX(coordinates[direction]['x']) + 5, transY(coordinates[direction]['y']) + 2.5)
-                context.stroke()  
+                context.moveTo(
+                    transX(coordinates[room]['x']),
+                    transY(coordinates[room]['y']) + widthBox / 2
+                )
+                context.lineTo(
+                    transX(coordinates[direction]['x']) + 5,
+                    transY(coordinates[direction]['y']) + widthBox / 2
+                );
+                context.stroke();
             }
+
+            if (coordinates[room]['id'].toString() === roomId.toString()){
+                context.fillStyle = 'purple'
+                console.log('Coloring current location')
+            } else {
+                context.fillStyle = 'black'
+            }
+
+            context.fillRect(
+                transX(coordinates[room]['x']),
+                transY(coordinates[room]['y']),
+                widthBox,
+                heightBox
+            )
+            context.fillStyle = 'black'
         }
 
-        // context.lineTo(20, 20)
-        // context.stroke()
-    }, [coordinates])
-
+    }, [coordinates, roomId, nextRoom, neighbors])
 
     return (
         <>
